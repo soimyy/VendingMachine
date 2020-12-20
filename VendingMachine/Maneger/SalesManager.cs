@@ -6,24 +6,20 @@ using VendingMachine.Base;
 
 namespace VendingMachine.Maneger {
 
-    /// <summary>
-    /// 販売管理
-    /// </summary>
+    /// <summary>販売管理</summary>
     internal class SalesManager {
 
-        /// <summary>
-        /// 商品管理クラス
-        /// </summary>
+        /// <summary>商品管理クラス</summary>
         private ProductManager m_productManager = null;
 
-        /// <summary>
-        /// お金管理クラス
-        /// </summary>
+        /// <summary>お金管理クラス</summary>
         private MoneyManager m_moneyManger = null;
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// コンストラクタ
         /// </summary>
+        ////////////////////////////////////////////////////////////
         internal SalesManager(SalesParameter salesParamter) {
 
             m_productManager = new ProductManager(salesParamter.ProductInfo);
@@ -32,10 +28,12 @@ namespace VendingMachine.Maneger {
 
         #region function
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// 管理を開始する
         /// </summary>
         /// <returns>開始結果</returns>
+        ////////////////////////////////////////////////////////////
         internal bool Start() {
 
             bool isSuccess = false;
@@ -62,10 +60,12 @@ namespace VendingMachine.Maneger {
             return true;
         }
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// 投入金額を更新する
         /// </summary>
         /// <param name="moneyInfoList"></param>
+        ////////////////////////////////////////////////////////////
         internal void UpdateInputMoney(MoneyInfoList moneyInfoList) {
 
             m_moneyManger.UpdateInputMoney(moneyInfoList);
@@ -73,10 +73,12 @@ namespace VendingMachine.Maneger {
             return;
         }
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// 釣り銭をだす
         /// </summary>
         /// <param name="moneyInfo"></param>
+        ////////////////////////////////////////////////////////////
         internal void GiveChange(ref MoneyInfoList moneyInfo) {
 
             m_moneyManger.GiveChange(ref moneyInfo);
@@ -84,17 +86,23 @@ namespace VendingMachine.Maneger {
             return;
         }
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
-        /// 商品を購入する
+        /// 購入可否を取得する
         /// </summary>
-        /// <param name="infoList">購入情報</param>
-        /// <returns>購入結果可否</returns>
-        internal bool BuyProduct(List<Dictionary<string, uint>> infoList) {
+        ////////////////////////////////////////////////////////////
+        internal bool GetEnablePurchase(SalesInfoBase info) {
 
-            bool result = false;
+            bool enablePurchase = false;
 
-             //result = m_productManager.
-            if (!result) {
+            enablePurchase = m_moneyManger.GetEnablePurchase(info);
+            if (!enablePurchase) {
+
+                return false;
+            }
+
+            enablePurchase = m_productManager.GetEnablePurchase(info);
+            if (!enablePurchase) {
 
                 return false;
             }
@@ -102,16 +110,21 @@ namespace VendingMachine.Maneger {
             return true;
         }
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
-        /// 釣り銭を出す
+        /// 商品を購入する
         /// </summary>
-        /// <returns>釣り銭</returns>
-        //internal List<Dictionary<string, uint>> GiveChange() {
+        /// <param name="info">購入情報</param>
+        /// <returns>購入結果</returns>
+        ////////////////////////////////////////////////////////////
+        internal bool Purchase(SalesInfoBase info) {
 
-        //    string change = string.Empty;
+            m_moneyManger.Purchase(info);
 
-        //    //return change;
-        //}
+            m_productManager.Purchase(info);
+
+            return true;
+        }
 
         #endregion 
     }

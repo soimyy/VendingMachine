@@ -12,8 +12,6 @@ namespace VendingMachine
         static private SalesParameter m_salesParameter = null;
         static private ApplicationController m_applicationController = null;
 
-        static private bool isEnd = false;
-
         static void Main(string[] args)
         {
 
@@ -33,10 +31,6 @@ namespace VendingMachine
 
                 // アプリケーション開始
                 m_applicationController.Start();
-
-                while(!isEnd) {
-                }
-
             }
             catch (Exception) {
 
@@ -46,5 +40,7 @@ namespace VendingMachine
 
             return;
         }
+
+
     }
 }

@@ -19,5 +19,21 @@ namespace VendingMachine.Base {
 
             m_salesInfoList = new List<SalesInfoBase>();
         }
+
+        /// <summary>
+        /// 合計金額を取得する
+        /// </summary>
+        /// <returns></returns>
+        public uint GetSumPrice() {
+
+            uint sum = 0;
+
+            foreach (var info in m_salesInfoList) {
+
+                sum += info.Price * info.Stock;
+            }
+
+            return sum;
+        }
     }
 }

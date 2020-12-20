@@ -30,32 +30,36 @@ namespace VendingMachine.Form {
         /// <param name="sender"></param>
         public delegate void GiveChangeEventHandler(object sender, EventArgs e);
 
+        /// <summary>
+        /// 商品購入イベント
+        /// </summary>
+        /// <param name="sender"></param>
+        public delegate void PurchaseProductEventHandler(object sender, SalesInfoBase productInfo);
+
         #endregion
 
         #region event
 
-        /// <summary>
-        /// お金受付イベント
-        /// </summary>
+        /// <summary>お金受付イベント</summary>
         public event AcceptMoneyEventHandler AcceptMoneyEvent;
 
-        /// <summary>
-        /// お金投入イベント
-        /// </summary>
+        /// <summary>お金投入イベント</summary>
         public event InputMoneyEventHandler InputMoneyEvent;
 
-        /// <summary>
-        /// 釣り銭イベント
-        /// </summary>
+        /// <summary>釣り銭イベント</summary>
         public event GiveChangeEventHandler GiveChangeEvent;
+
+        /// <summary>商品購入イベント</summary>
+        public event PurchaseProductEventHandler PurchaseProductEvent;
+
+        /// <summary>終了イベント</summary>
+        public event EventHandler EndControlEvent;
 
         #endregion
 
         #region enum
 
-        /// <summary>
-        /// 操作ID
-        /// </summary>
+        /// <summary>操作ID</summary>
         private enum Operation: int {
 
             InputMoney = 1,
@@ -69,16 +73,16 @@ namespace VendingMachine.Form {
 
         #region variable
 
-        /// <summary>
-        /// 販売情報
-        /// </summary>
+        /// <summary>販売情報</summary>
         private readonly SalesParameter m_salesParameter = null;
 
         #endregion
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// コンストラクタ
         /// </summary>
+        ////////////////////////////////////////////////////////////
         internal MainFrom(SalesParameter salesParamter) {
 
             m_salesParameter = salesParamter;
@@ -86,10 +90,12 @@ namespace VendingMachine.Form {
 
         #region function
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// 開始する
         /// </summary>
         /// <returns>開始結果</returns>
+        ////////////////////////////////////////////////////////////
         internal bool Start() {
 
             Operation operation = default(Operation);
@@ -128,9 +134,11 @@ namespace VendingMachine.Form {
             return true;
         }
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// お金を受け付ける
         /// </summary>
+        ////////////////////////////////////////////////////////////
         internal void AcceptMoney() {
 
             // お金を投入する
@@ -139,9 +147,11 @@ namespace VendingMachine.Form {
             return;
         }
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// 購入を受け付ける
         /// </summary>
+        ////////////////////////////////////////////////////////////
         internal void AcceptPurchace() {
 
             Operation operation = default(Operation);
@@ -161,29 +171,60 @@ namespace VendingMachine.Form {
             }
 
             // 購入を受け付ける
-
-
+            this.PurchaceProduct();
 
             return;
         }
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// 釣り銭をだす
         /// </summary>
+        ////////////////////////////////////////////////////////////
         internal void GiveChange(MoneyInfoList infoList) {
 
             Console.WriteLine($"返金します");
 
             this.Aggregate(infoList);
 
+            if (this.EndControlEvent != null) {
+
+                this.EndControlEvent(this, null);
+            }
+
             return;
         }
 
+        ////////////////////////////////////////////////////////////
+        /// <summary>
+        /// 商品の購入に失敗しました
+        /// </summary>
+        ////////////////////////////////////////////////////////////
+        internal void NotPurchase() {
 
+            Console.WriteLine($"購入に失敗しました。");
+
+            return;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /// <summary>
+        /// 商品の購入の成功
+        /// </summary>
+        ////////////////////////////////////////////////////////////
+        internal void Purchase() {
+
+            Console.WriteLine($"購入に成功しました。");
+
+            return;
+        }
+
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// 初期操作を受け付ける
         /// </summary>
         /// <returns>操作ID</returns>
+        ////////////////////////////////////////////////////////////
         private Operation InitOperation() {
 
             string input = string.Empty;
@@ -206,21 +247,30 @@ namespace VendingMachine.Form {
             return Operation.End;
         }
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// 集計する
         /// </summary>
+        ////////////////////////////////////////////////////////////
         private void Aggregate() {
 
             this.Aggregate(m_salesParameter.MoneyInfo);         // お金情報
             this.Aggregate(m_salesParameter.ProductInfo);       // 商品情報
 
+            if (this.EndControlEvent != null) {
+
+                this.EndControlEvent(this, null);
+            }
+
             return;
         }
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// 集計する
         /// </summary>
         /// <param name="info"></param>
+        ////////////////////////////////////////////////////////////
         private void Aggregate(SalesInfoListBase infoList) {
 
             foreach (SalesInfoBase info in infoList.m_salesInfoList) {
@@ -231,9 +281,11 @@ namespace VendingMachine.Form {
             return;
         }
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// お金を投入する
         /// </summary>
+        ////////////////////////////////////////////////////////////
         private void InputMoney() {
 
             uint number = 0;
@@ -268,20 +320,53 @@ namespace VendingMachine.Form {
             return;
         }
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// 商品を購入する
         /// </summary>
-        private void BuyProduct() {
+        ////////////////////////////////////////////////////////////
+        private void PurchaceProduct() {
 
+            string input = string.Empty;
+            int productNo = 0;
 
+            Console.WriteLine("商品名に該当する番号を指定してください。");
+
+            SalesInfoBase productInfo = null;
+
+            for (int index = 0; index < m_salesParameter.ProductInfo.m_salesInfoList.Count; index++) {
+
+                productInfo = m_salesParameter.ProductInfo.m_salesInfoList[index];
+                if (productInfo.Stock == 0) {
+
+                    continue;
+                }
+
+                Console.WriteLine($"商品名: {productInfo.Name.PadRight(10)} 金額: {productInfo.Price} 番号: {index}");
+            }
+
+            input = Console.ReadLine();
+            productNo = Convert.ToInt32(input);
+
+            // 購入商品を設定する
+            productInfo = m_salesParameter.ProductInfo.m_salesInfoList[productNo];
+
+            // 投入金額を更新する
+            if (PurchaseProductEvent != null) {
+
+                // 通知する
+                this.PurchaseProductEvent(this, productInfo);
+            }
 
             return;
         }
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// 購入操作を受け付ける
         /// </summary>
         /// <returns>操作ID</returns>
+        ////////////////////////////////////////////////////////////
         private Operation AcceptPurchaseOperation() {
 
             Console.WriteLine("操作を入力してください");

@@ -13,73 +13,57 @@ namespace VendingMachine.Maneger {
 
         #region variable
 
-        /// <summary>
-        /// 在庫
-        /// </summary>
+        /// <summary>在庫</summary>
         private MoneyInfoList m_stockInfo = null;
 
-        /// <summary>
-        /// 投入
-        /// </summary>
+        /// <summary>投入</summary>
         private MoneyInfoList m_inputInfo = null;
 
-        ///// <summary>
-        ///// お金価値リスト
-        ///// </summary>
-        //private List<int> m_valueList = null;
-
-        ///// <summary>
-        ///// お金名リスト
-        ///// </summary>
-        //private List<string> m_nameList = null;
-
-        //#endregion
-
-        //#region property
-
-        ///// <summary>
-        ///// 価値リスト
-        ///// </summary>
-        //internal List<int> ValueList {
-
-        //    get { return m_valueList; }
-        //}
-
-        ///// <summary>
-        ///// 名前リスト
-        ///// </summary>
-        //internal List<string> NameList {
-
-        //    get { return m_nameList; }
-        //}
+        /// <summary>投入</summary>
+        private uint m_inputPrice;
 
         #endregion
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// コンストラクタ
         /// </summary>
+        ////////////////////////////////////////////////////////////
         internal MoneyManager(MoneyInfoList infoList) : base(infoList) {
 
+            m_inputPrice = 0;
             m_stockInfo = infoList;
         }
 
         #region function
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// 投入金額を更新する
         /// </summary>
         /// <param name="moneyInfoList"></param>
+        ////////////////////////////////////////////////////////////
         internal void UpdateInputMoney(MoneyInfoList moneyInfoList) {
 
             m_inputInfo = moneyInfoList;
 
+            m_inputPrice = m_inputInfo.GetSumPrice();
+
+            // 在庫数と投入金額の情報マージする
+            for (int index = 0; index < m_stockInfo.m_salesInfoList.Count; index++) {
+
+                m_stockInfo.m_salesInfoList[index].Stock += m_inputInfo.m_salesInfoList[index].Stock;
+            }
+
             return;
         }
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// 釣り銭を出す
         /// </summary>
         /// <param name="moneyInfo"></param>
+        ////////////////////////////////////////////////////////////
         internal void GiveChange(ref MoneyInfoList moneyInfo) {
 
             // 釣り銭を設定する
@@ -88,118 +72,144 @@ namespace VendingMachine.Maneger {
             return;
         }
 
-        /// <summary>
-        /// 商品を購入する
-        /// </summary>
-        /// <param name="infoList">購入情報</param>
-        /// <returns>購入結果可否</returns>
-        internal bool BuyProduct(List<Dictionary<string, uint>> infoList) {
-
-            foreach (Dictionary<string, uint> info in infoList) {
-
-
-            }
-
-            return true;
-        }
-
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// 釣り銭を計算する
         /// </summary>
         /// <param name="moneyInfo"></param>
+        ////////////////////////////////////////////////////////////
         private void SetChange(ref MoneyInfoList moneyInfo) {
 
-            uint sumInputMoney = 0;
-
-            // 合計を計算する
-            sumInputMoney = this.CalcSum(m_inputInfo);
-
             // 釣り銭情報を計算する
-            this.ClacChange(ref moneyInfo, sumInputMoney);
+            this.ClacChange(ref moneyInfo);
 
             return;
         }
 
-        /// <summary>
-        /// 合計を計算する
-        /// </summary>
-        /// <param name="moneyInfo"></param>
-        /// <returns></returns>
-        private uint CalcSum(MoneyInfoList infoList) {
-
-            uint sum = 0;
-
-            foreach (SalesInfoBase info in infoList.m_salesInfoList) {
-
-                sum += info.Price * info.Stock;
-            }
-
-            return sum;
-        }
-
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// 釣り銭を設定する
         /// </summary>
         /// <param name="moneyInfo"></param>
         /// <param name="sumDiff"></param>
-        private void ClacChange(ref MoneyInfoList moneyInfo, uint sum) {
-
-            // 在庫数と投入金額の情報マージする
-            for (int index = 0; index < m_stockInfo.m_salesInfoList.Count; index++) {
-
-                m_stockInfo.m_salesInfoList[index].Stock += m_inputInfo.m_salesInfoList[index].Stock;
-            }
+        ////////////////////////////////////////////////////////////
+        private void ClacChange(ref MoneyInfoList moneyInfo) {
 
             // 情報から最小数の釣り銭を計算する
             for (int index = 0; index < m_stockInfo.m_salesInfoList.Count; index++) {
 
-                SalesInfoBase salesInfoBase = new SalesInfoBase(); 
+                SalesInfoBase changeData = new SalesInfoBase();
 
-                uint num = 0;
-                string name = m_stockInfo.m_salesInfoList[index].Name;
-                uint stock = m_stockInfo.m_salesInfoList[index].Stock;
-                uint price = m_stockInfo.m_salesInfoList[index].Price;
+                uint chargeCount = 0;
+                uint tmpChargeCount = 0;
+                SalesInfoBase stockData = null;
 
+                stockData = m_stockInfo.m_salesInfoList[index];
 
-                salesInfoBase.Price = price;
+                string name = stockData.Name;
+                uint stock = stockData.Stock;
+                uint price = stockData.Price;
 
-                // 合計金額 / 紙幣価値
-                num = sum / salesInfoBase.Price;
-                if (num == 0) {
+                // 紙幣枚数 = 合計金額 / 紙幣価値
+                tmpChargeCount = m_inputPrice / stockData.Price;
+                if (tmpChargeCount > stockData.Stock) {
 
-                    continue;
+                    chargeCount = stockData.Stock;
+                }
+                else {
+
+                    chargeCount = tmpChargeCount;
                 }
 
+                // 在庫の紙幣枚数を減らす
+                m_stockInfo.m_salesInfoList[index].Stock -= chargeCount;
 
-                //for (int min = 0; min < num; min++) {
+                // (合計金額 - 返金額)
+                m_inputPrice -= chargeCount * price;
 
+                // 釣り銭情報を設定する
+                changeData.Name = name;
+                changeData.Price = price;
+                changeData.Stock = chargeCount;
 
-
-                //    sum -= 
-                //}
-
-                //if (num > stock) {
-
-                //}
-                //salesInfoBase.Stock = m_stockInfo.m_salesInfoList[index].Stock - num;
-
-                //moneyInfo.m_salesInfoList.Add();
-
+                // 情報を追加する
+                moneyInfo.m_salesInfoList.Add(changeData);
             }
 
             return;
         }
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
-        /// 釣り銭を出す
+        /// 購入可否を取得する
         /// </summary>
-        /// <returns>釣り銭</returns>
-        //internal List<Dictionary<string, uint>> GiveChange() {
+        /// <returns></returns>
+        ////////////////////////////////////////////////////////////
+        internal override bool GetEnablePurchase(SalesInfoBase purchaseInfo) {
 
-        //    string change = string.Empty;
+            //uint inputSumPrice = 0;
+            uint returnMoney = 0;
 
-        //    return change;
-        //}
+            //inputSumPrice = m_inputInfo.GetSumPrice();
+
+            if (m_inputPrice < purchaseInfo.Price) {
+
+                // 投入金額 < 購入金額の場合
+                return false;
+            }
+
+            // 
+            returnMoney = m_inputPrice - purchaseInfo.Price;
+            //returnMoney = inputSumPrice - purchaseInfo.Price;
+
+            // 情報から最小数の釣り銭を計算する
+            for (int index = 0; index < m_stockInfo.m_salesInfoList.Count; index++) {
+
+                SalesInfoBase stockInfo = null;
+                uint tmpChargeCount = 0;
+                uint chargeCount = 0;
+
+                stockInfo = m_stockInfo.m_salesInfoList[index];
+
+                if (returnMoney < stockInfo.Price) {
+
+                    // 返金額 < 対象の紙幣の価値
+                    continue;
+                }
+
+                // 
+                tmpChargeCount = returnMoney / stockInfo.Price;
+                if (tmpChargeCount > stockInfo.Stock) {
+
+                    chargeCount = stockInfo.Stock;
+                }
+                else {
+
+                    chargeCount = tmpChargeCount;
+                }
+
+                returnMoney -= stockInfo.Price * chargeCount;
+            }
+            if (returnMoney != 0) {
+
+                return false;
+            }
+
+            return true;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /// <summary>
+        /// 購入する
+        /// </summary>
+        /// <returns></returns>
+        ////////////////////////////////////////////////////////////
+        internal override bool Purchase(SalesInfoBase purchaseInfo) {
+
+            m_inputPrice -= purchaseInfo.Price;
+
+            return true;
+        }
 
         #endregion 
 

@@ -10,18 +10,18 @@ namespace VendingMachine.Base {
 
         #region メンバ変数
 
-        /// <summary>
-        /// 販売情報のリスト
-        /// </summary>
+        /// <summary>販売情報のリスト</summary>
         private SalesInfoListBase m_salesInfoList = null;
 
         #endregion
 
         #region コンストラクタ
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// コンストラクタ
         /// </summary>
+        ////////////////////////////////////////////////////////////
         internal SalesManagerBase(SalesInfoListBase infoList) {
 
             m_salesInfoList = infoList;
@@ -33,11 +33,32 @@ namespace VendingMachine.Base {
 
         #region
 
+        ////////////////////////////////////////////////////////////
         /// <summary>
         /// 管理を開始する
         /// </summary>
         /// <returns>開始結果</returns>
+        ////////////////////////////////////////////////////////////
         internal virtual bool Start() {
+
+            return true;
+        }
+
+        ////////////////////////////////////////////////////////////
+        /// <summary>
+        /// 購入可否を取得する
+        /// </summary>
+        /// <returns></returns>
+        ////////////////////////////////////////////////////////////
+        internal abstract bool GetEnablePurchase(SalesInfoBase info);
+
+        ////////////////////////////////////////////////////////////
+        /// <summary>
+        /// 購入する
+        /// </summary>
+        /// <returns></returns>
+        ////////////////////////////////////////////////////////////
+        internal virtual bool Purchase(SalesInfoBase purchaseInfo) {
 
             return true;
         }

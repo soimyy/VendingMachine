@@ -9,3 +9,4 @@
 /Users/bepputatsuhiko/Projects/VendingMachine/VendingMachine/obj/Release/netcoreapp3.1/VendingMachine.dll
 /Users/bepputatsuhiko/Projects/VendingMachine/VendingMachine/obj/Release/netcoreapp3.1/VendingMachine.pdb
 /Users/bepputatsuhiko/Projects/VendingMachine/VendingMachine/obj/Release/netcoreapp3.1/VendingMachine.genruntimeconfig.cache
+/Users/bepputatsuhiko/Projects/VendingMachine/VendingMachine/obj/Release/netcoreapp3.1/VendingMachine.csprojAssemblyReference.cache

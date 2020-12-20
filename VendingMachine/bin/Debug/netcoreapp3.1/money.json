@@ -7,23 +7,23 @@
     },
     {
       "name": "500円玉",
-      "price": 1000,
+      "price": 500,
       "stock": 1
     },
     {
       "name": "100円玉",
-      "price": 10,
+      "price": 100,
       "stock": 10
     },
     {
       "name": "50円玉",
-      "price": 10,
-      "stock": 2
+      "price": 50,
+      "stock": 3
     },
     {
       "name": "10円玉",
       "price": 10,
-      "stock": 20
+      "stock": 30
     }
   ]
 }
